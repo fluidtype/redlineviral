@@ -492,6 +492,9 @@ Made with fluidtype corp. — powered by Next.js 14, Supabase, Grok & GPT-4o.
 - FTS: kits.search_tsv with trigger on title/caption/hashtags.
 - Indices: jsonb_path_ops on analysis_result.scores, GIN on search_tsv, trigram on caption.
 
+
 ## 🔐 Auth OFF mode
 - Builds succeed without Clerk keys; authentication features are automatically disabled.
 - Set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY (then restart) to restore full Clerk authentication.
+=======
+
