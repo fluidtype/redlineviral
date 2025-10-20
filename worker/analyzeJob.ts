@@ -1,14 +1,13 @@
-import Ajv from "ajv";
-import { analysisResultSchema } from "@/lib/validation/analysisResultSchema";
-
-const ajv = new Ajv({ allErrors: true, removeAdditional: true });
-const validate = ajv.compile(analysisResultSchema);
+import { ZodError } from "zod";
+import { analysisResultSchema } from "@shared/schemas/analysisResult";
 
 export async function persistAnalysisResult(result: unknown) {
-  if (!validate(result)) {
-    console.error("Validation errors:", validate.errors);
+  try {
+    return analysisResultSchema.parse(result);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      console.error("Validation errors:", error.issues);
+    }
     throw new Error("VALIDATION_FAIL");
   }
-
-  return result;
 }

@@ -23,6 +23,7 @@ export type Analysis = {
   started_at: string;
   finished_at?: string | null;
   error_code?: string | null;
+  parent_analysis_id?: string | null;
 };
 
 export type AnalysisResult = {
@@ -47,6 +48,7 @@ export type TrendCache = {
 export type Kit = {
   id: string;
   analysis_id: string;
+  version: number;
   title: string;
   caption: string;
   hashtags: string[];

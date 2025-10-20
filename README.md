@@ -6,6 +6,14 @@ Dev commands:
 - `pnpm typecheck && pnpm lint && pnpm test`
 Node 20, pnpm 9. Workspaces: apps/web, apps/worker, packages/shared.
 
+# 🛡️ Security Hardening (Pass 1)
+
+- Supabase migration (`2025-10-20_hardening_constraints.sql`) introducing parent/child analysis lineage, cache-ready indexes, and versioned kits with unique `(analysis_id, version)` pairs.
+- Tightened RLS policies for `analysis`, `analysis_result`, `kits`, and `notifications` to keep tenant boundaries symmetrical for every verb.
+- New reusable security helpers (`requireIdempotencyKey`, `assertOrigin`, signed SSE tokens) and automated checks preventing server secret leakage in client bundles.
+- Centralised Zod schemas for trends, analysis results, and sandbox outputs with dedicated unit tests.
+- `/api/trends` stubbed to serve cached data only (15m TTL) while we wire the Trends provider in Block 5.
+
 # 🚀 REDLINEVIRAL — Dashboard Workflow v3.1
 
 **The Autonomous Viral Content Director**
@@ -184,11 +192,23 @@ UX chiara (Empty / Loading / Error) • Idempotency-key su upload • Shortcuts 
 | ----------------- | --------------- | ----------------------------------------- |
 | `profiles`        | Utenti          | id, email, niche[], region                |
 | `videos`          | Upload          | id, user_id, url, duration_s, has_audio   |
-| `analysis`        | Job pipeline    | id, video_id, status, started_at          |
-| `analysis_result` | Output          | radar jsonb, scores jsonb, warnings jsonb |
-| `trends_cache`    | Trend API cache | platform, region, payload, cached_at      |
-| `kits`            | Publishing      | analysis_id, caption, hashtags            |
+| `analysis`        | Job pipeline    | id, video_id, parent_analysis_id, started_at |
+| `analysis_result` | Output          | analysis_id (unique), radar jsonb, scores |
+| `trends_cache`    | Trend API cache | platform, region, hours, query, cached_at |
+| `kits`            | Publishing      | analysis_id, version, caption, hashtags   |
 | `notifications`   | Smart Queue     | type, payload, read_at                    |
+
+---
+
+## ✅ Testing Matrix
+
+| Command | Purpose |
+| ------- | ------- |
+| `pnpm -w lint` | ESLint across workspaces |
+| `pnpm -w typecheck` | TypeScript project references |
+| `pnpm -w test` | Vitest suites (env leakage, RLS simulation, schema guards, security helpers) |
+| `AUTH_MODE=off CI=1 pnpm --filter @rv/web build` | Production build to feed env leakage scan |
+| `pnpm --filter @rv/worker build` | Worker type checks/build |
 
 ---
 
