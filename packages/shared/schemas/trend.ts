@@ -1,43 +1,58 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
 
-export const trendItemSchema = z.object({
+type TrendQueryRecord = {
+  platform: "tiktok" | "instagram" | "x";
+  region: string;
+  hours: "3" | "12" | "24" | "72";
+  query: string;
+};
+
+const TrendItemObjectSchema = z.object({
   title: z.string().min(1),
-  growth_rate: z.number().min(0),
+  growth_rate: z.number().min(0).max(1),
   saturation: z.enum(["low", "medium", "high"]),
-  examples: z.array(z.string().min(1)).max(10),
+  examples: z.array(z.string().min(1)),
   created_at: z.string().datetime(),
 });
 
-export type TrendItem = z.infer<typeof trendItemSchema>;
-
-export const trendQuerySchema = z
-  .object({
-    platform: z.string().min(1),
-    region: z.string().min(1),
-    hours: z.coerce.number().int().min(1).max(168).default(12),
-    query: z
-      .string()
-      .trim()
-      .min(1)
-      .max(256)
-      .optional()
-      .transform((value) => (value === undefined || value === "" ? undefined : value)),
-  })
-  .transform((input) => ({
-    ...input,
-    query: input.query ?? undefined,
-  }));
-
-export type TrendQueryInput = z.infer<typeof trendQuerySchema>;
+export const TrendItemSchema = z.array(TrendItemObjectSchema);
+export type TrendItem = z.infer<typeof TrendItemObjectSchema>;
 
 function normalizeQuery(query?: string | null) {
-  if (!query) return "";
-  return query.trim().toLowerCase();
+  if (query === undefined || query === null) {
+    return "";
+  }
+
+  const normalized = query.trim().toLowerCase();
+  return normalized.length === 0 ? "" : normalized;
 }
 
-export function makeTrendsCacheKey(input: Pick<TrendQueryInput, "platform" | "region" | "hours" | "query">) {
-  const normalizedQuery = normalizeQuery(input.query ?? undefined);
-  return [input.platform.toLowerCase(), input.region.toLowerCase(), String(input.hours), normalizedQuery].join(":");
+export const TrendQuerySchema = z
+  .object({
+    platform: z.enum(["tiktok", "instagram", "x"]),
+    region: z.string().trim().min(1).transform(value => value.trim()),
+    hours: z.enum(["3", "12", "24", "72"]),
+    query: z.string().optional(),
+  })
+  .transform(value => ({
+    platform: value.platform,
+    region: value.region,
+    hours: value.hours,
+    query: normalizeQuery(value.query),
+  } satisfies TrendQueryRecord));
+
+export type TrendQuery = z.infer<typeof TrendQuerySchema>;
+export type TrendQueryInput = TrendQuery;
+
+export function makeTrendsCacheKey({ platform, region, hours, query }: TrendQueryRecord) {
+  const normalizedQuery = normalizeQuery(query);
+  const hash = createHash("sha1").update(normalizedQuery).digest("hex");
+  return `trends:${platform}:${region.toLowerCase()}:${hours}:${hash}`;
 }
 
-export const TREND_CACHE_TTL_SECONDS = 15 * 60;
+export const TREND_TTL_MS = 15 * 60 * 1000;
+export const TREND_CACHE_TTL_SECONDS = TREND_TTL_MS / 1000;
+
+export const trendItemSchema = TrendItemObjectSchema;
+export const trendQuerySchema = TrendQuerySchema;
