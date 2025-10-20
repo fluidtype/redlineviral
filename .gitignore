@@ -1,12 +1,12 @@
 # dependencies
 node_modules
-pnpm-lock.yaml
 
 # build
 dist
 .next
 out
 coverage
+tsconfig.tsbuildinfo
 
 # env
 .env*
