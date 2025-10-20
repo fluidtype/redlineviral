@@ -1,8 +1,31 @@
 {
-  "name": "@rv/shared",
-  "version": "0.0.0",
+  "name": "redlineviral",
   "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "exports": { ".": "./src/index.ts" }
+  "version": "0.0.0",
+  "packageManager": "pnpm@9",
+  "engines": { "node": ">=20 <21" },
+  "scripts": {
+    "prepare": "husky install",
+    "dev:web": "pnpm --filter @rv/web dev",
+    "dev:worker": "pnpm --filter @rv/worker dev",
+    "build:web": "pnpm --filter @rv/web build",
+    "build:worker": "pnpm --filter @rv/worker build",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "format": "prettier -w .",
+    "test": "pnpm -r run test",
+    "e2e": "pnpm --filter @rv/web e2e",
+    "ci": "pnpm lint && pnpm typecheck && pnpm test && pnpm build:web && pnpm build:worker"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "eslint": "^9.12.0",
+    "eslint-config-next": "^14.2.5",
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4",
+    "@types/node": "^20.14.12"
+  }
 }
