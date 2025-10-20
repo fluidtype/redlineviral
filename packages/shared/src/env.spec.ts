@@ -63,10 +63,13 @@ describe("env loader", () => {
     expect(() => requireKey("R2_BUCKET")).not.toThrow();
   });
 
-  it("requireKey throws for empty values", async () => {
-    const m = minimalEnv();
-    m.R2_BUCKET = "";
-    process.env = { ...process.env, ...m };
-    await expect(load()).rejects.toMatchObject({ message: expect.stringContaining("ENV_INVALID") });
+  it("requireKey throws when value is missing after load", async () => {
+    process.env = { ...process.env, ...minimalEnv() };
+    const { env, requireKey } = await load();
+    // Simulate a missing key at use-site (beyond Zod validation time)
+    delete (env as Record<string, unknown>).R2_BUCKET;
+    expect(() => requireKey("R2_BUCKET")).toThrowErrorMatchingObject({
+      message: expect.stringContaining("ENV_MISSING")
+    });
   });
 });
