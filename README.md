@@ -486,3 +486,28 @@ Made with fluidtype corp. — powered by Next.js 14, Supabase, Grok & GPT-4o.
 
 ---
 
+
+## 🧱 Block 2 — DB Schema & RLS
+- RLS enabled on user-owned tables; isolation via auth.uid() → profiles.id → videos → analysis → kits.
+- FTS: kits.search_tsv with trigger on title/caption/hashtags.
+- Indices: jsonb_path_ops on analysis_result.scores, GIN on search_tsv, trigram on caption.
+
+## 🔐 Auth Toggle — OFF/ON
+- Toggle with `AUTH_MODE` (default `auto`). Authentication is enabled only when `AUTH_MODE` is not set to `off` **and** both `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (must start with `pk_`) and `CLERK_SECRET_KEY` are populated.
+- OFF mode (no keys or `AUTH_MODE=off`) keeps builds/test suites green and surfaces a dev-only banner/placeholder instead of Clerk UI.
+- ON mode (e.g. local smoke testing):
+
+  ```env
+  AUTH_MODE=on
+  CLERK_PUBLISHABLE_KEY=pk_test_123
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_123
+  CLERK_SECRET_KEY=sk_test_123
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/app
+  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/app
+  ```
+
+- Create `.env.on.local` with the snippet above (file is git-ignored).
+- Use `pnpm test:auth` to run OFF/ON Playwright smoke checks sequentially.
+- Production: provide real keys from the Clerk dashboard and keep `AUTH_MODE=on`. Configure allowed URLs under **Developers → Domains** (redirects/origins) and **Developers → Paths**.
