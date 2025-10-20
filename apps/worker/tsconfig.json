@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": ".",
-    "paths": { "@shared/*": ["../../packages/shared/src/*"] }
+    "paths": {
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@shared/schemas/*": ["../../packages/shared/schemas/*"]
+    }
   },
   "include": ["src"]
 }

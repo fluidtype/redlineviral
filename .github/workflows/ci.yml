@@ -13,4 +13,33 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm ci
+      - run: pnpm -w run lint
+      - run: pnpm -w run typecheck
+      - run: pnpm -w run test
+      - name: Build web (AUTH_MODE=off)
+        run: pnpm --filter @rv/web build
+        env:
+          AUTH_MODE: off
+          DATABASE_URL: postgres://user:pass@localhost:5432/db
+          SUPABASE_URL: https://project.supabase.co
+          SUPABASE_ANON_KEY: public-anon-key
+          SUPABASE_JWT_SECRET: jwt-secret
+          SUPABASE_SERVICE_ROLE_KEY: service-role-secret
+          CLERK_PUBLISHABLE_KEY: pk_test
+          CLERK_SECRET_KEY: sk_test_secret
+          CLERK_WEBHOOK_SIGNING_SECRET: wh_test_secret
+          OPENAI_API_KEY: openai-secret
+          GROK_API_KEY: grok-secret
+          R2_ACCOUNT_ID: r2-account
+          R2_BUCKET: r2-bucket
+          R2_ACCESS_KEY_ID: r2-access
+          R2_SECRET_ACCESS_KEY: r2-secret
+          REDIS_URL: https://redis.example
+          BULLMQ_PREFIX: rv
+          TURNSTILE_SITE_KEY: turnstile-site
+          TURNSTILE_SECRET: turnstile-secret
+          WORKER_JWT_SECRET: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+          RESEND_API_KEY: resend-secret
+          POSTHOG_API_KEY: posthog-secret
+          SENTRY_DSN: https://example.ingest.sentry.io/1
+      - run: pnpm --filter @rv/worker build

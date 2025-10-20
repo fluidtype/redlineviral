@@ -9,6 +9,13 @@ const sql = readFileSync(
   "utf8"
 );
 
+const hardeningSql = readFileSync(
+  fileURLToPath(
+    new URL("../../../../apps/web/supabase/migrations/2025-10-20_hardening_constraints.sql", import.meta.url)
+  ),
+  "utf8"
+);
+
 function has(re: RegExp) {
   return expect(sql).toMatch(re);
 }
@@ -53,5 +60,24 @@ describe("Block 2 schema", () => {
     has(/jsonb_path_ops/i);
     has(/using gin\s*\(search_tsv\)/i);
     has(/gin_trgm_ops/i);
+  });
+});
+
+describe("Hardening migration", () => {
+  function expectHardening(re: RegExp) {
+    return expect(hardeningSql).toMatch(re);
+  }
+
+  it("adds versioned kits unique constraint", () => {
+    expectHardening(/unique\s*\(analysis_id,\s*version\)/i);
+  });
+
+  it("tracks parent analysis lineage", () => {
+    expectHardening(/parent_analysis_id/i);
+    expectHardening(/idx_analysis_parent_created_at/i);
+  });
+
+  it("refreshes trends cache index", () => {
+    expectHardening(/trends_cache.*coalesce\(query, ''\).*cached_at desc/i);
   });
 });
