@@ -1,6 +1,8 @@
-import { authEnabled } from "./authToggle";
+import { isAuthEnabled } from "@shared/env";
 
 type ClerkModule = typeof import("@clerk/nextjs/server");
+
+const authEnabled = isAuthEnabled();
 
 async function loadClerk(): Promise<ClerkModule> {
   if (!authEnabled) {

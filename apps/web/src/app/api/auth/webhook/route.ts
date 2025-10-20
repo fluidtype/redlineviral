@@ -1,18 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
-import { authEnabled } from "../../../../lib/authToggle";
+import { env, isAuthEnabled } from "@shared/env";
 
 export async function POST(req: NextRequest) {
-  if (!authEnabled) {
+  if (!isAuthEnabled()) {
     return new Response(null, { status: 204 });
   }
 
-  const [{ verifyWebhook }, { env }] = await Promise.all([
-    import("@clerk/nextjs/webhooks"),
-    import("@rv/shared"),
-  ]);
+  const { verifyWebhook } = await import("@clerk/nextjs/webhooks");
 
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+
+  if (!env.CLERK_WEBHOOK_SIGNING_SECRET) {
+    throw new Error("CLERK_WEBHOOK_SIGNING_SECRET is required when AUTH_MODE=on");
+  }
 
   try {
     const evt = await verifyWebhook(req, {

@@ -20,6 +20,7 @@ void REQUIRED;
 
 function minimalEnv(): Record<string,string> {
   return {
+    AUTH_MODE: "on",
     DATABASE_URL: "postgres://user:pass@host:5432/db",
     SUPABASE_URL: "https://proj.supabase.co",
     SUPABASE_ANON_KEY: "anon",
@@ -72,5 +73,21 @@ describe("env loader", () => {
     // Simulate a missing key at use-site (beyond Zod validation time)
     delete (env as Record<string, unknown>).R2_BUCKET;
     expect(() => requireKey("R2_BUCKET")).toThrowError(/ENV_MISSING/);
+  });
+
+  it("allows disabling auth without Clerk keys", async () => {
+    const envValues = minimalEnv();
+    envValues.AUTH_MODE = "off";
+    delete envValues.CLERK_PUBLISHABLE_KEY;
+    delete envValues.CLERK_SECRET_KEY;
+    delete envValues.CLERK_WEBHOOK_SIGNING_SECRET;
+
+    process.env = { ...process.env, ...envValues };
+    delete process.env.CLERK_PUBLISHABLE_KEY;
+    delete process.env.CLERK_SECRET_KEY;
+    delete process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+
+    const mod = await load();
+    expect(mod.isAuthEnabled()).toBe(false);
   });
 });
