@@ -68,8 +68,6 @@ describe("env loader", () => {
     const { env, requireKey } = await load();
     // Simulate a missing key at use-site (beyond Zod validation time)
     delete (env as Record<string, unknown>).R2_BUCKET;
-    expect(() => requireKey("R2_BUCKET")).toThrowErrorMatchingObject({
-      message: expect.stringContaining("ENV_MISSING")
-    });
+    expect(() => requireKey("R2_BUCKET")).toThrowError(/ENV_MISSING/);
   });
 });

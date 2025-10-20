@@ -1,8 +1,11 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, it, expect } from "vitest";
 
 const sql = readFileSync(
-  require.resolve("../../../apps/web/supabase/migrations/2025-10-20_block-2_schema.sql"),
+  fileURLToPath(
+    new URL("../../../../apps/web/supabase/migrations/2025-10-20_block-2_schema.sql", import.meta.url)
+  ),
   "utf8"
 );
 
