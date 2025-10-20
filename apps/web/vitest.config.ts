@@ -5,5 +5,9 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["src/e2e/**"],
     coverage: { provider: "v8" }
+  },
+  esbuild: {
+    jsx: "automatic",
+    jsxImportSource: "react"
   }
 });
