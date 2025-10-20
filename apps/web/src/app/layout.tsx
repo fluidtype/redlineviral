@@ -1,8 +1,13 @@
-'use client';
+"use client";
 import "./globals.css";
+import dynamic from "next/dynamic";
 import { ReactNode } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
 import { authEnabled, reasonIfDisabled } from "../lib/authToggle";
+
+const ClerkProvider = dynamic(async () => {
+  const mod = await import("@clerk/nextjs");
+  return { default: mod.ClerkProvider };
+}, { ssr: false });
 
 const isDev = process.env.NODE_ENV !== "production";
 

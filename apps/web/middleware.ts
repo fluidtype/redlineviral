@@ -1,12 +1,12 @@
 import type { NextMiddleware } from "next/server";
 import { NextResponse } from "next/server";
-import { authEnabled } from "./src/lib/authToggle";
+import { isAuthEnabled } from "@shared/env";
 
 const publicRoutes = ["/sign-in(.*)", "/sign-up(.*)"];
 
 const noopMiddleware: NextMiddleware = () => NextResponse.next();
 
-const middlewarePromise: Promise<NextMiddleware> = authEnabled
+const middlewarePromise: Promise<NextMiddleware> = isAuthEnabled()
   ? import("@clerk/nextjs/server").then(({ clerkMiddleware, createRouteMatcher }) => {
       const isPublicRoute = createRouteMatcher(publicRoutes);
       return clerkMiddleware(async (auth, req) => {
@@ -17,7 +17,10 @@ const middlewarePromise: Promise<NextMiddleware> = authEnabled
     })
   : Promise.resolve(noopMiddleware);
 
-export default async function middleware(req: Parameters<NextMiddleware>[0], event: Parameters<NextMiddleware>[1]) {
+export default async function middleware(
+  req: Parameters<NextMiddleware>[0],
+  event: Parameters<NextMiddleware>[1],
+) {
   const middleware = await middlewarePromise;
   return middleware(req, event);
 }
