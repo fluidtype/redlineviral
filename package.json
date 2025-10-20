@@ -2,7 +2,7 @@
   "name": "redlineviral",
   "private": true,
   "version": "0.0.0",
-  "packageManager": "pnpm@9",
+  "packageManager": "pnpm@9.12.0",
   "engines": { "node": ">=20 <21" },
   "scripts": {
     "prepare": "husky install",
