@@ -1,11 +1,19 @@
-import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { createClient } from "@supabase/supabase-js";
-import { env } from "@rv/shared";
-import { NextRequest } from "next/server";
-
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+import type { NextRequest } from "next/server";
+import { authEnabled } from "../../../../lib/authToggle";
 
 export async function POST(req: NextRequest) {
+  if (!authEnabled) {
+    return new Response(null, { status: 204 });
+  }
+
+  const [{ verifyWebhook }, { env }] = await Promise.all([
+    import("@clerk/nextjs/webhooks"),
+    import("@rv/shared"),
+  ]);
+
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+
   try {
     const evt = await verifyWebhook(req, {
       signingSecret: env.CLERK_WEBHOOK_SIGNING_SECRET,
