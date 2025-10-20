@@ -1,5 +1,5 @@
-// Client-safe env: only NEXT_PUBLIC_* keys, provided via packages/shared env.publicEnv
-import { publicEnv } from "@shared/env";
-
-export const clientEnv = publicEnv;
-// Usage example elsewhere: clientEnv.NEXT_PUBLIC_POSTHOG_KEY
+// Client-safe: Next inlines ONLY NEXT_PUBLIC_* at build time.
+// Do NOT import server-side env loader here.
+export const clientEnv = {
+  NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY ?? ""
+} as const;
