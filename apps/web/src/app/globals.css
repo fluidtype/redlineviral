@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-neutral-950 text-neutral-100;
+  }
+}
+
+@layer utilities {
+  .card-muted {
+    @apply border border-white/5 bg-white/5 backdrop-blur;
+  }
+}
